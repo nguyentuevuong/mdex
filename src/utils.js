@@ -5,22 +5,40 @@ import { Command } from "commander";
 
 export const FRONTMATTER_REGEX = /^---\s*\n([\s\S]*?)\n---\s*\n/;
 
-export const stopLoading = (templatePath) => {
+/**
+ * Handles the error when template loading fails and exits the process.
+ * @param {string} templatePath - The path to the template file that failed to load.
+ * @param {Error} err - The error object.
+ */
+export const stopLoading = (templatePath, err) => {
   const msg = chalk.red(`Error loading template from ${templatePath}:`);
-
   console.error(msg, err);
-
   process.exit(1);
 };
 
+/**
+ * Creates a formatted input directory message with gray styling.
+ * @param {string} inputDir - The input directory path.
+ * @returns {string} The formatted message string.
+ */
 export const makeInputMsg = (inputDir) => {
   return chalk.bold.gray(`Input:  ${inputDir}`);
 };
 
+/**
+ * Creates a formatted output directory message with gray styling.
+ * @param {string} outputDir - The output directory path.
+ * @returns {string} The formatted message string.
+ */
 export const makeOutputMsg = (outputDir) => {
   return chalk.bold.gray(`Output: ${outputDir}\n`);
 };
 
+/**
+ * Displays the startup log message with input/output directory information.
+ * @param {string} inputDir - The input directory path.
+ * @param {string} outputDir - The output directory path.
+ */
 export const startingLog = (inputDir, outputDir) => {
   const msg = chalk.bold.blue("🚀 Starting Markdown Export...");
 
@@ -29,12 +47,19 @@ export const startingLog = (inputDir, outputDir) => {
   console.log(makeOutputMsg(outputDir));
 };
 
+/**
+ * Displays a message indicating the homepage was successfully synchronized.
+ * @param {Object} firstNode - The first node from the file tree (homepage).
+ */
 export const showHomePageMsg = (firstNode) => {
   console.log(
     chalk.green(`Homepage synchronized from: ${firstNode.fullRelativePath}`),
   );
 };
 
+/**
+ * Displays a warning message when no Markdown files are found in the input directory.
+ */
 export const showNotFoundMDFile = () => {
   const msg = chalk.yellow(
     "⚠️ No Markdown files found in the input directory.",
@@ -43,7 +68,6 @@ export const showNotFoundMDFile = () => {
   console.log(msg);
 };
 
-// Helper to strip numeric prefix from a single path segment
 /**
  * Removes numeric prefixes from a path segment (e.g., "01.guide" -> "guide").
  * @param {string} segment - The path segment.
@@ -53,7 +77,6 @@ export function cleanSegment(segment) {
   return segment.replace(/^\d+\.?\s*/, "");
 }
 
-// Helper to clean an entire relative path
 /**
  * Cleans an entire file path by removing numeric prefixes from all segments.
  * @param {string} filePath - The original file path.
@@ -63,7 +86,6 @@ export function getCleanPath(filePath) {
   return filePath.split(path.sep).map(cleanSegment).join(path.sep);
 }
 
-// Helper to prune titles for navigation (e.g., "01.Welcome Zed" -> "Welcome")
 /**
  * Prunes the title string by removing numeric prefixes and specific suffixes.
  * @param {string} title - The raw title string.
@@ -77,7 +99,6 @@ export function pruneTitle(title) {
   return cleaned.replace(/\s+Zed$/i, "").trim();
 }
 
-// Helper to get title from frontmatter
 /**
  * Extracts the title from a markdown file, checking frontmatter first, then the first H1 hearing.
  * @param {string} filePath - The path to the markdown file.
@@ -111,7 +132,6 @@ export async function getFileTitle(filePath) {
   return null;
 }
 
-// Build hierarchical file tree
 /**
  * Builds a hierarchical tree structure from a list of files.
  * Identifies index files for directories and organizes content.
@@ -122,6 +142,7 @@ export async function getFileTitle(filePath) {
  */
 export async function buildFileTree(files, inputDir) {
   const tree = {};
+
   for (const file of files) {
     const parts = file.split(path.sep);
     const cleanFile = getCleanPath(file);
@@ -187,10 +208,10 @@ export async function buildFileTree(files, inputDir) {
   }
 
   findIndexFiles(tree);
+
   return tree;
 }
 
-// Helper to find the first logical file in the tree (honoring numeric sorting)
 /**
  * Finds the first logical file in the tree (honoring numeric sorting).
  * Used to determine the homepage content.
@@ -202,7 +223,6 @@ export function findFirstFile(tree) {
   return flat.length > 0 ? flat[0] : null;
 }
 
-// Flatten the sorted tree into a sequence of pages
 /**
  * Flattens the file tree into a sequential list of pages.
  * Used for generating "Previous" and "Next" links.
@@ -232,9 +252,8 @@ export function flattenFileTree(tree) {
 }
 
 /**
- *
- * @param {Function} callback
- * @returns
+ * Creates and configures the CLI command with the given action callback.
+ * @param {Function} callback - The action function to execute when the command is run.
  */
 export const createCommand = (callback) => {
   new Command()
