@@ -3,11 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const body = document.body;
 
-    // Inject SVG chevrons
-    document.querySelectorAll('.chevron').forEach(el => {
-        el.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`;
-    });
-
     if (menuToggle && sidebarOverlay) {
         function toggleMenu() {
             body.classList.toggle('sidebar-open');
