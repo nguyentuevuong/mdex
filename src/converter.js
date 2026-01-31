@@ -33,7 +33,12 @@ const md = markdownIt({
   slugify: slugify,
 });
 
-// Slugify function
+/**
+ * Slugifies a string into a URL-friendly version.
+ *
+ * @param {string} s - The string to slugify.
+ * @returns {string} The slugified string.
+ */
 function slugify(s) {
   return s
     .normalize("NFD")
@@ -46,7 +51,11 @@ function slugify(s) {
     .replace(/\s+/g, "-");
 }
 
-// Parse frontmatter
+/**
+ * Parses the YAML header of a Markdown file.
+ * @param {string} content - The content of the Markdown file.
+ * @returns {object} An object containing the parsed data and body.
+ */
 function parseFrontmatter(content) {
   const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
   const match = content.match(frontmatterRegex);
@@ -86,7 +95,11 @@ function extractTOC(body) {
   return toc;
 }
 
-// Helper: Find first child href
+/**
+ * Finds the first child href of a node.
+ * @param {object} node - The node to search.
+ * @returns {string|null} The first child href or null if not found.
+ */
 function getFirstChildHref(node) {
   if (!node.children || Object.keys(node.children).length === 0) return null;
 
@@ -112,7 +125,13 @@ function getFirstChildHref(node) {
   }
 }
 
-// Helper: Check if descendant is active
+/**
+ * Checks if a descendant node is active.
+ *
+ * @param {object} node - The node to check.
+ * @param {string} currentPath - The current path.
+ * @returns {boolean} Whether the descendant node is active.
+ */
 function isDescendantActive(node, currentPath) {
   if (node.type === "file") {
     return node.fullRelativePath === currentPath;
@@ -128,7 +147,15 @@ function isDescendantActive(node, currentPath) {
   return false;
 }
 
-// Render file tree
+/**
+ * Renders the file tree HTML from a tree object.
+ *
+ * @param {object} tree - The file tree object.
+ * @param {string} currentPath - The current path.
+ * @param {string} relativeLevel - The relative level.
+ * @param {number} depth - The depth of the file tree.
+ * @returns {string} The HTML of the file tree.
+ */
 function renderFileTree(tree, currentPath, relativeLevel, depth = 0) {
   let html = "<ul>";
   const entries = Object.entries(tree).sort(([a, nodeA], [b, nodeB]) => {
@@ -214,7 +241,20 @@ function renderFileTree(tree, currentPath, relativeLevel, depth = 0) {
   return html;
 }
 
-// Main convert function
+/**
+ * Converts a Markdown file to HTML.
+ *
+ * @param {string} content - The content of the Markdown file.
+ * @param {string} fileName - The name of the Markdown file.
+ * @param {object} fileTree - The file tree object.
+ * @param {string} currentPath - The current path.
+ * @param {string} relativeLevel - The relative level.
+ * @param {object|null} prev - The previous file.
+ * @param {object|null} next - The next file.
+ * @param {string|null} customHeader - The custom header.
+ * @param {string|null} customFooter - The custom footer.
+ * @returns {string} The HTML of the converted Markdown file.
+ */
 function convert(
   content,
   fileName,
@@ -263,12 +303,30 @@ function convert(
 // Template variable
 let templateContent = "";
 
-// Set template content
+/**
+ * Sets the template content.
+ * @param {string} template - The template content.
+ */
 function setTemplateContent(template) {
   templateContent = template;
 }
 
-// Wrap with template
+/**
+ * Wraps the content with the template.
+ *
+ * @param {string} content - The content to wrap.
+ * @param {string} title - The title of the page.
+ * @param {object} data - The frontmatter data.
+ * @param {object[]} toc - The table of contents.
+ * @param {object} fileTree - The file tree object.
+ * @param {string} currentPath - The current path.
+ * @param {string} relativeLevel - The relative level.
+ * @param {object|null} prev - The previous file.
+ * @param {object|null} next - The next file.
+ * @param {string|null} customHeader - The custom header.
+ * @param {string|null} customFooter - The custom footer.
+ * @returns {string} The wrapped HTML.
+ */
 function wrapWithTemplate(
   content,
   title,
