@@ -212,7 +212,7 @@ program
 
             // Scan available themes
             const __dirname = path.dirname(new URL(import.meta.url).pathname);
-            const themesDir = path.join(__dirname, 'assets', 'themes');
+            const themesDir = path.join(__dirname, 'assets');
             const availableThemes = (await fs.readdir(themesDir))
                 .filter(file => file.endsWith('.css'))
                 .map(file => file.replace('.css', ''));
@@ -269,7 +269,7 @@ program
             }
 
             // Copy assets (CSS, JS, Fonts) to output directory
-            const themesDest = path.join(outputDir, 'assets', 'themes');
+            const themesDest = path.join(outputDir, 'assets');
             const jsSrc = path.join(__dirname, 'assets', 'script.js');
             const jsDest = path.join(outputDir, 'assets', 'script.js');
 

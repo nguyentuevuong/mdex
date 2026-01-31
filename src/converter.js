@@ -5,6 +5,17 @@ import yaml from 'js-yaml';
 import path from 'path';
 
 export class MarkdownConverter {
+    slugify(s) {
+        return s
+            .normalize('NFD') // Normalize to NFD form (decomposes accents)
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D') // Handle distinct Vietnamese characters
+            .toLowerCase() // Convert to lowercase
+            .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric chars (keep spaces/hyphens)
+            .trim() // Remove leading/trailing spaces
+            .replace(/\s+/g, '-'); // Replace spaces with hyphens
+    }
+
     constructor() {
         this.md = markdownIt({
             html: true,
@@ -20,7 +31,9 @@ export class MarkdownConverter {
                 }
                 return '<pre class="hljs"><code>' + this.md.utils.escapeHtml(str) + '</code></pre>';
             }
-        }).use(anchor);
+        }).use(anchor, {
+            slugify: (s) => this.slugify(s)
+        });
 
         // Custom fence renderer for Mermaid.js
         const defaultFence = this.md.renderer.rules.fence || function (tokens, idx, options, env, self) {
@@ -66,7 +79,7 @@ export class MarkdownConverter {
 
                 // Find ID attribute from tokens
                 const idAttr = tokens[i].attrs && tokens[i].attrs.find(attr => attr[0] === 'id');
-                const id = idAttr ? idAttr[1] : title.toLowerCase().replace(/[^\w]+/g, '-');
+                const id = idAttr ? idAttr[1] : this.slugify(title);
 
                 toc.push({ level: tokens[i].tag, title, id });
             }
