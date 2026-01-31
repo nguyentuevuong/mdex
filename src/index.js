@@ -165,15 +165,11 @@ createCommand(async (options) => {
       }
 
       // Copy assets (CSS, JS, Fonts) to output directory
-      const jsSrc = path.join(__dirname, "assets", "script.js");
-      const jsDest = path.join(outputDir, "assets", "script.js");
-
       const cssSrc = path.join(__dirname, "assets", "modern.css");
       const cssDest = path.join(outputDir, "assets", "modern.css");
 
       mkdirSync(path.join(outputDir, "assets"), { recursive: true });
 
-      copyFileSync(jsSrc, jsDest);
       copyFileSync(cssSrc, cssDest);
 
       console.log(chalk.blue(`View your site in: ${outputDir}`));

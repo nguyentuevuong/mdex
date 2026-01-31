@@ -13,13 +13,6 @@
             rel="stylesheet"
             href="{{relativeLevel}}assets/modern.css"
         />
-
-        <script src="{{relativeLevel}}assets/script.js"></script>
-        <script type="module">
-            import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm";
-
-            mermaid.initialize({ startOnLoad: true, theme: "light" });
-        </script>
     </head>
 
     <body class="flex flex-row">
@@ -53,5 +46,38 @@
             <h4>On this page</h4>
             {{toc}}
         </aside>
+        <script>
+            // Event listener for click events
+            document.addEventListener("click", (evt) => {
+                const { target } = evt;
+
+                // Check if the clicked element has the "chevron" class
+                if (target.classList.contains("chevron")) {
+                    console.log({ target });
+
+                    // Get the closest <li> element to the clicked element
+                    const closest = target.closest("li");
+
+                    // Check if the list item is expanded
+                    if (closest) {
+                        const expanded = closest.classList.contains("expanded");
+
+                        // If the list item is not expanded, add the "expanded" class
+                        if (!expanded) {
+                            closest.classList.add("expanded");
+                        } else {
+                            // If the list item is expanded, remove the "expanded" class
+                            closest.classList.remove("expanded");
+                        }
+                    }
+                }
+            });
+        </script>
+
+        <script type="module">
+            import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm";
+
+            mermaid.initialize({ startOnLoad: true, theme: "light" });
+        </script>
     </body>
 </html>
