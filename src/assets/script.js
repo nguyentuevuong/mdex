@@ -1,56 +1,25 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const body = document.body;
+// Event listener for click events
+document.addEventListener("click", (evt) => {
+  const { target } = evt;
 
-    if (menuToggle && sidebarOverlay) {
-        function toggleMenu() {
-            body.classList.toggle('sidebar-open');
-        }
+  // Check if the clicked element has the "chevron" class
+  if (target.classList.contains("chevron")) {
+    console.log({ target });
 
-        menuToggle.addEventListener('click', toggleMenu);
-        sidebarOverlay.addEventListener('click', toggleMenu);
+    // Get the closest <li> element to the clicked element
+    const closest = target.closest("li");
 
-        // Close menu when clicking a link on mobile
-        const sidebarLinks = document.querySelectorAll('.sidebar-left a');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (body.classList.contains('sidebar-open')) {
-                    toggleMenu();
-                }
-            });
-        });
+    // Check if the list item is expanded
+    if (closest) {
+      const expanded = closest.classList.contains("expanded");
+
+      // If the list item is not expanded, add the "expanded" class
+      if (!expanded) {
+        closest.classList.add("expanded");
+      } else {
+        // If the list item is expanded, remove the "expanded" class
+        closest.classList.remove("expanded");
+      }
     }
-
-    // Toggle sidebar collapse
-    document.querySelectorAll('.chevron').forEach(chevron => {
-        chevron.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const li = chevron.closest('li');
-            li.classList.toggle('expanded');
-
-            // Rotate chevron
-            if (li.classList.contains('expanded')) {
-                chevron.style.transform = 'rotate(90deg)';
-                chevron.style.color = 'var(--un-preset-theme-colors-zinc-100)';
-            } else {
-                chevron.style.transform = 'rotate(0deg)';
-                chevron.style.color = '';
-            }
-        });
-    });
-
-    // Folder labels also toggle if they don't have a direct link or if clicked on the row
-    document.querySelectorAll('.folder-row').forEach(row => {
-        row.addEventListener('click', (e) => {
-            // Only toggle if they didn't click the actual <a> link
-            if (e.target.tagName !== 'A') {
-                const li = row.closest('li');
-                if (li.classList.contains('has-children')) {
-                    li.classList.toggle('expanded');
-                }
-            }
-        });
-    });
-
+  }
 });
