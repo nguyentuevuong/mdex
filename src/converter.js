@@ -63,6 +63,17 @@ export class MarkdownConverter {
 
             return defaultFence(tokens, idx, options, env, self);
         };
+
+        this.md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+            const token = tokens[idx];
+            const info = token.info ? this.md.utils.unescapeAll(token.info).trim() : '';
+
+            if (info === 'mermaid') {
+                return `<div class="mermaid">${token.content}</div>`;
+            }
+
+            return defaultFence(tokens, idx, options, env, self);
+        };
     }
 
     /**
@@ -266,11 +277,11 @@ export class MarkdownConverter {
      * @param {Object|null} [next=null] - Next page node for pagination.
      * @param {string|null} [customHeader=null] - Rendered HTML for custom header.
      * @param {string|null} [customFooter=null] - Rendered HTML for custom footer.
-     * @param {string} [theme='modern'] - The selected theme.
-     * @param {Array<string>} [availableThemes=[]] - List of available themes.
+     * @param {string|null} [customHeader=null] - Rendered HTML for custom header.
+     * @param {string|null} [customFooter=null] - Rendered HTML for custom footer.
      * @returns {string} The complete HTML page.
      */
-    convert(content, fileName, fileTree, currentPath, relativeLevel = '', prev = null, next = null, customHeader = null, customFooter = null, theme = 'modern', availableThemes = []) {
+    convert(content, fileName, fileTree, currentPath, relativeLevel = '', prev = null, next = null, customHeader = null, customFooter = null) {
         const { data, body } = this.parseFrontmatter(content);
         let title = data.title;
         let finalBody = body;
@@ -293,7 +304,7 @@ export class MarkdownConverter {
         const toc = this.extractTOC(finalBody); // Extract TOC from the body WITHOUT the main title
         const pageTitle = title;
 
-        return this.wrapWithTemplate(htmlContent, pageTitle, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter, theme, availableThemes);
+        return this.wrapWithTemplate(htmlContent, pageTitle, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter);
     }
 
     /**
@@ -331,11 +342,9 @@ export class MarkdownConverter {
      * @param {Object} next - Next page object.
      * @param {string} customHeader - HTML for header.
      * @param {string} customFooter - HTML for footer.
-     * @param {string} theme - Theme name.
-     * @param {Array} availableThemes - Available themes.
      * @returns {string} Final HTML string.
      */
-    wrapWithTemplate(content, title, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter, theme, availableThemes) {
+    wrapWithTemplate(content, title, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter) {
         const sidebarHtml = this.renderFileTree(fileTree, currentPath, relativeLevel);
         const tocHtml = toc.length > 0
             ? `<ul>${toc.map(item => `<li class="toc-${item.level}"><a href="#${item.id}">${item.title}</a></li>`).join('')}</ul>`
@@ -356,7 +365,7 @@ export class MarkdownConverter {
         ` : '<div></div>';
 
 
-        const mermaidTheme = theme === 'dark' || theme === 'midnight' || theme === 'zed' ? 'dark' : 'default';
+        const mermaidTheme = 'default';
 
         let template = this.templateContent;
         if (!template) {
@@ -378,7 +387,6 @@ export class MarkdownConverter {
             .replace(/{{customFooter}}/g, customFooter ? `<div class="custom-footer">${customFooter}</div>` : '')
             .replace(/{{buildDate}}/g, new Date().toLocaleDateString())
             .replace(/{{toc}}/g, tocHtml)
-            .replace(/{{theme}}/g, theme)
             .replace(/{{mermaidTheme}}/g, mermaidTheme)
     }
 }

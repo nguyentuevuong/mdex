@@ -206,12 +206,10 @@ program
     .version('1.0.0')
     .option('-i, --input <dir>', 'Input directory containing .md files', '.')
     .option('-o, --output <dir>', 'Output directory for HTML files', 'dist')
-    .option('-t, --theme <name>', 'Theme to use (modern, dark, midnight)', 'modern')
     .option('-v, --verbose', 'Enable verbose logging', false)
     .action(async (options) => {
         const inputDir = path.resolve(options.input);
         const outputDir = path.resolve(options.output);
-        const theme = options.theme || 'modern';
 
         console.log(chalk.bold.blue('🚀 Starting Markdown Export...'));
         console.log(chalk.gray(`Input:  ${inputDir}`));
@@ -254,13 +252,6 @@ program
             // Scan available themes
             const __dirname = path.dirname(new URL(import.meta.url).pathname);
             const themesDir = path.join(__dirname, 'assets');
-            const availableThemes = (await fs.readdir(themesDir))
-                .filter(file => file.endsWith('.css'))
-                .map(file => file.replace('.css', ''));
-
-            if (!availableThemes.includes(theme)) {
-                throw new Error(`Theme '${theme}' not found. Available themes: ${availableThemes.join(', ')}`);
-            }
 
             console.log(chalk.cyan(`Building navigation tree...`));
             const fileTree = await buildFileTree(docFiles, inputDir);
@@ -289,7 +280,7 @@ program
                     console.log(chalk.gray(`Processing: ${file} -> ${path.relative(outputDir, outputFilePath)}`));
                 }
 
-                const html = converter.convert(content, file, fileTree, file, relativeLevel, prev, next, customHeader, customFooter, theme, availableThemes);
+                const html = converter.convert(content, file, fileTree, file, relativeLevel, prev, next, customHeader, customFooter);
 
                 await fs.ensureDir(path.dirname(outputFilePath));
                 await fs.writeFile(outputFilePath, html);
@@ -304,7 +295,7 @@ program
             if (firstNode) {
                 if (options.verbose) console.log(chalk.gray('Updating root index.html from first page...'));
                 const content = await fs.readFile(path.join(inputDir, firstNode.fullRelativePath), 'utf-8');
-                const html = converter.convert(content, firstNode.fullRelativePath, fileTree, firstNode.fullRelativePath, './', null, null, customHeader, customFooter, theme, availableThemes);
+                const html = converter.convert(content, firstNode.fullRelativePath, fileTree, firstNode.fullRelativePath, './', null, null, customHeader, customFooter);
                 await fs.writeFile(rootIndexDest, html);
                 console.log(chalk.green(`Homepage synchronized from: ${firstNode.fullRelativePath}`));
             }
