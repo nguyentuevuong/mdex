@@ -37,12 +37,13 @@ export class MarkdownConverter {
             highlight: (str, lang) => {
                 if (lang && hljs.getLanguage(lang)) {
                     try {
-                        return '<pre class="hljs"><code>' +
+                        return '<pre class="hljs">' +
                             hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-                            '</code></pre>';
+                            '</pre>';
                     } catch (__) { }
                 }
-                return '<pre class="hljs"><code>' + this.md.utils.escapeHtml(str) + '</code></pre>';
+
+                return '<pre class="hljs">' + this.md.utils.escapeHtml(str) + '</pre>';
             }
         }).use(anchor, {
             slugify: (s) => this.slugify(s)
