@@ -4,7 +4,17 @@ import hljs from 'highlight.js';
 import yaml from 'js-yaml';
 import path from 'path';
 
+/**
+ * Class responsible for converting Markdown content to HTML with custom extensions.
+ */
 export class MarkdownConverter {
+    /**
+     * Converts a string into a URL-friendly slug.
+     * Handles Vietnamese accents by normalizing to NFD and removing diacritics.
+     *
+     * @param {string} s - The string to slugify.
+     * @returns {string} The slugified string.
+     */
     slugify(s) {
         return s
             .normalize('NFD') // Normalize to NFD form (decomposes accents)
@@ -16,6 +26,9 @@ export class MarkdownConverter {
             .replace(/\s+/g, '-'); // Replace spaces with hyphens
     }
 
+    /**
+     * Initializes the MarkdownConverter with markdown-it plugins and custom configurations.
+     */
     constructor() {
         this.md = markdownIt({
             html: true,
@@ -52,6 +65,12 @@ export class MarkdownConverter {
         };
     }
 
+    /**
+     * Parses the YAML frontmatter from the markdown content.
+     *
+     * @param {string} content - The raw markdown content.
+     * @returns {{data: Object, body: string}} An object containing the parsed frontmatter data and the body content.
+     */
     parseFrontmatter(content) {
         const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
         const match = content.match(frontmatterRegex);
@@ -67,6 +86,13 @@ export class MarkdownConverter {
         return { data: {}, body: content };
     }
 
+    /**
+     * Extracts the Table of Contents (TOC) from the markdown body.
+     * Generates IDs using the same slugify logic as the renderer.
+     *
+     * @param {string} body - The markdown body content.
+     * @returns {Array<{level: string, title: string, id: string}>} An array of TOC items.
+     */
     extractTOC(body) {
         const tokens = this.md.parse(body, {});
         const toc = [];
@@ -86,6 +112,13 @@ export class MarkdownConverter {
         }
         return toc;
     }
+    
+    /**
+     * helper to find the first valid link (child file) for a directory node.
+     *
+     * @param {Object} node - The directory node in the file tree.
+     * @returns {string|null} The relative path to the first child's HTML file, or null if empty.
+     */
     getFirstChildHref(node) {
         if (!node.children || Object.keys(node.children).length === 0) return null;
 
@@ -111,6 +144,14 @@ export class MarkdownConverter {
     }
 
 
+    /**
+     * Checks if a node or any of its descendants matches the current path.
+     * Used for expanding the sidebar navigation.
+     *
+     * @param {Object} node - The file tree node.
+     * @param {string} currentPath - The full relative path of the current page.
+     * @returns {boolean} True if the node is active or has an active descendant.
+     */
     isDescendantActive(node, currentPath) {
         if (node.type === 'file') {
             return node.fullRelativePath === currentPath;
@@ -124,6 +165,15 @@ export class MarkdownConverter {
         return false;
     }
 
+    /**
+     * Renders the recursive file tree as an HTML list for the sidebar.
+     *
+     * @param {Object} tree - The file tree structure.
+     * @param {string} currentPath - The current file path (for highlighting active items).
+     * @param {string} relativeLevel - relative path prefix to root.
+     * @param {number} [depth=0] - Current recursion depth.
+     * @returns {string} The rendered HTML string.
+     */
     renderFileTree(tree, currentPath, relativeLevel, depth = 0) {
         let html = '<ul>';
         const entries = Object.entries(tree).sort(([a, nodeA], [b, nodeB]) => {
@@ -203,6 +253,23 @@ export class MarkdownConverter {
         return html;
     }
 
+    /**
+     * Main conversion method.
+     * Parses frontmatter, renders markdown, extracts TOC, and wraps in template.
+     *
+     * @param {string} content - Raw markdown content.
+     * @param {string} fileName - Name of the source file.
+     * @param {Object} fileTree - Complete file tree for navigation.
+     * @param {string} currentPath - Relative path of the current file.
+     * @param {string} [relativeLevel=''] - Relative path to root (e.g. "../").
+     * @param {Object|null} [prev=null] - Previous page node for pagination.
+     * @param {Object|null} [next=null] - Next page node for pagination.
+     * @param {string|null} [customHeader=null] - Rendered HTML for custom header.
+     * @param {string|null} [customFooter=null] - Rendered HTML for custom footer.
+     * @param {string} [theme='modern'] - The selected theme.
+     * @param {Array<string>} [availableThemes=[]] - List of available themes.
+     * @returns {string} The complete HTML page.
+     */
     convert(content, fileName, fileTree, currentPath, relativeLevel = '', prev = null, next = null, customHeader = null, customFooter = null, theme = 'modern', availableThemes = []) {
         const { data, body } = this.parseFrontmatter(content);
         let title = data.title;
@@ -229,6 +296,10 @@ export class MarkdownConverter {
         return this.wrapWithTemplate(htmlContent, pageTitle, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter, theme, availableThemes);
     }
 
+    /**
+     * Loading logic for template.
+     * Currently a placeholder as loading is handled in index.js.
+     */
     loadTemplate() {
         if (!this.template) {
             const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -237,10 +308,33 @@ export class MarkdownConverter {
         }
     }
 
+    /**
+     * Sets the raw template content.
+     * @param {string} templateContent - HTML string of the template.
+     */
     setTemplate(templateContent) {
         this.templateContent = templateContent;
     }
 
+    /**
+     * Wraps the rendered markdown content with the HTML template.
+     * Performs string replacement for template variables.
+     *
+     * @param {string} content - Rendered HTML content of the markdown body.
+     * @param {string} title - Page title.
+     * @param {Object} data - Frontmatter data.
+     * @param {Array} toc - Table of Contents array.
+     * @param {Object} fileTree - File tree for sidebar.
+     * @param {string} currentPath - Current file path.
+     * @param {string} relativeLevel - Relative path to root.
+     * @param {Object} prev - Previous page object.
+     * @param {Object} next - Next page object.
+     * @param {string} customHeader - HTML for header.
+     * @param {string} customFooter - HTML for footer.
+     * @param {string} theme - Theme name.
+     * @param {Array} availableThemes - Available themes.
+     * @returns {string} Final HTML string.
+     */
     wrapWithTemplate(content, title, data, toc, fileTree, currentPath, relativeLevel, prev, next, customHeader, customFooter, theme, availableThemes) {
         const sidebarHtml = this.renderFileTree(fileTree, currentPath, relativeLevel);
         const tocHtml = toc.length > 0

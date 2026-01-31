@@ -24,16 +24,31 @@ try {
 }
 
 // Helper to strip numeric prefix from a single path segment
+/**
+ * Removes numeric prefixes from a path segment (e.g., "01.guide" -> "guide").
+ * @param {string} segment - The path segment.
+ * @returns {string} The cleaned segment.
+ */
 function cleanSegment(segment) {
     return segment.replace(/^\d+\.?\s*/, '');
 }
 
 // Helper to clean an entire relative path
+/**
+ * Cleans an entire file path by removing numeric prefixes from all segments.
+ * @param {string} filePath - The original file path.
+ * @returns {string} The cleaned file path.
+ */
 function getCleanPath(filePath) {
     return filePath.split(path.sep).map(cleanSegment).join(path.sep);
 }
 
 // Helper to prune titles for navigation (e.g., "01.Welcome Zed" -> "Welcome")
+/**
+ * Prunes the title string by removing numeric prefixes and specific suffixes.
+ * @param {string} title - The raw title string.
+ * @returns {string} The pruned title.
+ */
 function pruneTitle(title) {
     if (!title) return title;
     // Remove numeric prefixes like "01.", "1.", etc.
@@ -43,6 +58,11 @@ function pruneTitle(title) {
 }
 
 // Helper to get title from frontmatter
+/**
+ * Extracts the title from a markdown file, checking frontmatter first, then the first H1 hearing.
+ * @param {string} filePath - The path to the markdown file.
+ * @returns {Promise<string|null>} The extracted title or null.
+ */
 async function getFileTitle(filePath) {
     try {
         const content = await fs.readFile(filePath, 'utf-8');
@@ -66,6 +86,14 @@ async function getFileTitle(filePath) {
 }
 
 // Build hierarchical file tree
+/**
+ * Builds a hierarchical tree structure from a list of files.
+ * Identifies index files for directories and organizes content.
+ *
+ * @param {Array<string>} files - List of relative file paths.
+ * @param {string} inputDir - Base input directory.
+ * @returns {Promise<Object>} The file tree structure.
+ */
 async function buildFileTree(files, inputDir) {
     const tree = {};
     for (const file of files) {
@@ -132,12 +160,25 @@ async function buildFileTree(files, inputDir) {
 }
 
 // Helper to find the first logical file in the tree (honoring numeric sorting)
+/**
+ * Finds the first logical file in the tree (honoring numeric sorting).
+ * Used to determine the homepage content.
+ * @param {Object} tree - The file tree.
+ * @returns {Object|null} The first file node.
+ */
 function findFirstFile(tree) {
     const flat = flattenFileTree(tree);
     return flat.length > 0 ? flat[0] : null;
 }
 
 // Flatten the sorted tree into a sequence of pages
+/**
+ * Flattens the file tree into a sequential list of pages.
+ * Used for generating "Previous" and "Next" links.
+ *
+ * @param {Object} tree - The file tree.
+ * @returns {Array<Object>} Sorted list of file nodes.
+ */
 function flattenFileTree(tree) {
     let flat = [];
     const entries = Object.entries(tree).sort(([a, nodeA], [b, nodeB]) => {
