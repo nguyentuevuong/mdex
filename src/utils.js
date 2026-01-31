@@ -60,7 +60,7 @@ export const showHomePageMsg = (firstNode) => {
 /**
  * Displays a warning message when no Markdown files are found in the input directory.
  */
-export const showNotFoundMDFile = () => {
+export const handleMissingFiles = () => {
   const msg = chalk.yellow(
     "⚠️ No Markdown files found in the input directory.",
   );

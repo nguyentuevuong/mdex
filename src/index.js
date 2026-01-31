@@ -15,7 +15,7 @@ import { md, setTemplateContent, convert } from "./converter.js";
 import {
   stopLoading,
   startingLog,
-  showNotFoundMDFile,
+  handleMissingFiles,
   createCommand,
   getCleanPath,
   buildFileTree,
@@ -72,7 +72,7 @@ createCommand(async (options) => {
       .filter((c) => !/(node_modules|dist|\.git)/.test(c));
 
     if (files.length === 0) {
-      showNotFoundMDFile();
+      handleMissingFiles();
     } else {
       console.log(chalk.cyan(`Building navigation tree...`));
       const fileTree = await buildFileTree(files, inputDir);
