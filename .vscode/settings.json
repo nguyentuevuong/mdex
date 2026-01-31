@@ -1,0 +1,20 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    ".env": ".env*",
+    ".workspace": ".npmrc, .gitignore",
+    "tsconfig.json": "env.d.ts, tsconfig.*",
+    "package.json": "package*.json, pnpm-*.yaml",
+    "vite.config.ts": "uno.config.*, vite.config.*, vitest.setups.*, vitest.config.*"
+  },
+  "search.exclude": {
+    "**/{dist,html,node_modules}/**": true,
+  },
+  "files.exclude": {
+    "**/{dist,html,node_modules}": true,
+  },
+  "editor.tabSize": 2,
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "explorer.compactFolders": false,
+}
